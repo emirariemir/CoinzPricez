@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    var phoneConnector = PhoneConnector()
+  @ObservedObject var phoneConnector = PhoneConnector()
   
   private func sendHearts() {
     let randomHeartNumber = String(Int.random(in: 0..<100))
@@ -20,9 +20,10 @@ struct ContentView: View {
   
     var body: some View {
       VStack (spacing: 10) {
-            Image(systemName: "heart.fill")
+          Image(systemName: "heart.fill")
                 .imageScale(.large)
                 .foregroundStyle(.yellow)
+        Text(self.phoneConnector.receivedMessage)
           Button {
             sendHearts()
           } label: {

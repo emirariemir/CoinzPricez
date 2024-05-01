@@ -8,10 +8,19 @@
 import WatchKit
 import WatchConnectivity
 
-final class PhoneConnector: NSObject, WCSessionDelegate {
+final class PhoneConnector: NSObject, WCSessionDelegate, ObservableObject {
   
-  func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
+  @Published var receivedMessage = "Waiting..."
+  
+  func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
     // Something here, lmao
+  }
+  
+  func session(_ session: WCSession, didReceiveMessage message: [String : Any], replyHandler: @escaping ([String : Any]) -> Void) {
+    guard let messageFromApp = message["messageFromApp"] as? String else { return }
+    DispatchQueue.main.async {
+      self.receivedMessage = messageFromApp
+    }
   }
   
   var session: WCSession

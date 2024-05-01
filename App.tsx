@@ -7,9 +7,10 @@
 
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 
-import { watchEvents } from 'react-native-watch-connectivity';
+import { watchEvents, sendMessage } from 'react-native-watch-connectivity';
 
 import {
+  Alert,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -30,9 +31,23 @@ type RefreshButtonProps = PropsWithChildren <{
   buttonTitle: string;
 }>;
 
+type WatchMessage = PropsWithChildren <{
+  watchMessage: string;
+}>;
+
+function sendPrice({watchMessage}: WatchMessage) {
+  sendMessage({messageFromApp: watchMessage}, reply => {console.log(reply)}, error => { 
+    if (error) { 
+      Alert.alert("A major problem occured.")
+    }
+  });
+}
+
 function CoinButton({coinTitle}: CoinButtonProps): React.JSX.Element {
+  const sendPriceWithMessage = () => sendPrice({ watchMessage: `Price of ${coinTitle}/USD` });
+
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={sendPriceWithMessage}>
       <View style={styles.coinButton}>
         <Text>Show me {coinTitle}/USD price on my watch.</Text>
       </View>
@@ -52,6 +67,7 @@ function RefreshButton({buttonTitle}: RefreshButtonProps): React.JSX.Element {
 
 function App(): React.JSX.Element {
   const [messageFromWatch, setMessageFromWatch] = useState("Waiting...");
+  const [message, setMessage] = useState("");
 
   type Message = PropsWithChildren <{
     watchMessage: string;
@@ -78,7 +94,7 @@ function App(): React.JSX.Element {
         <CoinButton coinTitle='SOL'/>
       </View>
       <RefreshButton buttonTitle='Refresh Data'/>
-      <Text>The watch sent you {messageFromWatch} hearts!</Text>
+      <Text style={styles.description}>The watch sent you {messageFromWatch} hearts!</Text>
       </SafeAreaView>
     </View>
   );
