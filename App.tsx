@@ -5,14 +5,16 @@
  * @format
  */
 
-import React from 'react';
+import React, { PropsWithChildren, useEffect, useState } from 'react';
+
+import { watchEvents } from 'react-native-watch-connectivity';
 
 import {
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -20,8 +22,47 @@ import {
   Colors,
 } from 'react-native/Libraries/NewAppScreen';
 
+type CoinButtonProps = PropsWithChildren <{
+  coinTitle: string;
+}>;
+
+type RefreshButtonProps = PropsWithChildren <{
+  buttonTitle: string;
+}>;
+
+function CoinButton({coinTitle}: CoinButtonProps): React.JSX.Element {
+  return (
+    <TouchableOpacity>
+      <View style={styles.coinButton}>
+        <Text>Show me {coinTitle}/USD price on my watch.</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+function RefreshButton({buttonTitle}: RefreshButtonProps): React.JSX.Element {
+  return (
+    <TouchableOpacity>
+      <View style={styles.refreshButton}>
+        <Text style={styles.refreshText}>{buttonTitle}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 function App(): React.JSX.Element {
+  const [messageFromWatch, setMessageFromWatch] = useState("Waiting...");
+
+  type Message = PropsWithChildren <{
+    watchMessage: string;
+  }>;
+
+  const messageListener = () => watchEvents.on('message', (message: Message) => {
+    setMessageFromWatch(message.watchMessage)
+  })
+  useEffect(() => {
+      messageListener()
+  }, [])
 
   return (
     <View style={styles.container}>
@@ -32,19 +73,12 @@ function App(): React.JSX.Element {
         <Text style={styles.description}>An app that will tell you your favorite crypto coin prices.</Text>
       </View>
       <View style={styles.coinButtonsView}>
-        <View style={styles.coinButton}>
-          <Text>Show me BTC/USD Price</Text>
-        </View>
-        <View style={styles.coinButton}>
-          <Text>Show me ETH/USD Price</Text>
-        </View>
-        <View style={styles.coinButton}>
-          <Text>Show me SOL/USD Price</Text>
-        </View>
+        <CoinButton coinTitle='BTC'/>
+        <CoinButton coinTitle='ETH'/>
+        <CoinButton coinTitle='SOL'/>
       </View>
-      <View style={styles.refreshButton}>
-        <Text style={styles.refreshText}>Refresh Data</Text>
-      </View>
+      <RefreshButton buttonTitle='Refresh Data'/>
+      <Text>The watch sent you {messageFromWatch} hearts!</Text>
       </SafeAreaView>
     </View>
   );

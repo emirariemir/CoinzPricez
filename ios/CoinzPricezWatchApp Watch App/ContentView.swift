@@ -8,12 +8,26 @@
 import SwiftUI
 
 struct ContentView: View {
+    var phoneConnector = PhoneConnector()
+  
+  private func sendHearts() {
+    let randomHeartNumber = String(Int.random(in: 0..<100))
+    let message: [String: Any] = ["watchMessage": randomHeartNumber]
+    self.phoneConnector.session.sendMessage(message, replyHandler: nil) { (error) in
+      print(error.localizedDescription)
+    }
+  }
+  
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
+      VStack (spacing: 10) {
+            Image(systemName: "heart.fill")
                 .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+                .foregroundStyle(.yellow)
+          Button {
+            sendHearts()
+          } label: {
+            Text("Send to app!")
+          }
         }
         .padding()
     }
