@@ -43,13 +43,52 @@ function sendPrice({watchMessage}: WatchMessage) {
   });
 }
 
+const fetchCryptoPrice = async (coinTitle: string) => {
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinTitle}&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false&precision=2`;
+  const options = {
+    method: 'GET',
+    headers: { accept: 'application/json', 'x-cg-demo-api-key': 'CG-wfXWfDRGhPVXF34KpwjHhc4d' }
+  };
+
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching crypto price:', error);
+    return null;
+  }
+};
+
 function CoinButton({coinTitle}: CoinButtonProps): React.JSX.Element {
-  const sendPriceWithMessage = () => sendPrice({ watchMessage: `Price of ${coinTitle}/USD` });
+  const sendPriceWithMessage = async () => {
+    try {
+      const data = await fetchCryptoPrice(coinTitle); // Fetch crypto price
+      console.log(data.bitcoin);
+      if (data) {
+        console.log(coinTitle);
+        console.log(data[coinTitle.toLowerCase()]);
+        const price = data[coinTitle.toLowerCase()].usd; // Extract and format price
+        const messageToSend = `Price of ${coinTitle}: $${price}`;
+        sendMessage({messageFromApp: messageToSend}, reply => {console.log(reply)}, error => { 
+          if (error) { 
+            console.log (error.message);
+            Alert.alert("A major problem occured.")
+          }
+        });
+      } else {
+        Alert.alert("Failed to fetch crypto price.");
+      }
+    } catch (error) {
+      console.error('Error fetching crypto price:', error);
+      Alert.alert("An error occurred while fetching crypto price.");
+    }
+  };
 
   return (
     <TouchableOpacity onPress={sendPriceWithMessage}>
       <View style={styles.coinButton}>
-        <Text>Show me {coinTitle}/USD price on my watch.</Text>
+        <Text>Show me {coinTitle} price on my watch.</Text>
       </View>
     </TouchableOpacity>
   );
@@ -67,7 +106,6 @@ function RefreshButton({buttonTitle}: RefreshButtonProps): React.JSX.Element {
 
 function App(): React.JSX.Element {
   const [messageFromWatch, setMessageFromWatch] = useState("Waiting...");
-  const [message, setMessage] = useState("");
 
   type Message = PropsWithChildren <{
     watchMessage: string;
@@ -89,9 +127,9 @@ function App(): React.JSX.Element {
         <Text style={styles.description}>An app that will tell you your favorite crypto coin prices.</Text>
       </View>
       <View style={styles.coinButtonsView}>
-        <CoinButton coinTitle='BTC'/>
-        <CoinButton coinTitle='ETH'/>
-        <CoinButton coinTitle='SOL'/>
+        <CoinButton coinTitle='Bitcoin'/>
+        <CoinButton coinTitle='Ethereum'/>
+        <CoinButton coinTitle='Solana'/>
       </View>
       <RefreshButton buttonTitle='Refresh Data'/>
       <Text style={styles.description}>The watch sent you {messageFromWatch} hearts!</Text>
@@ -134,6 +172,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 15,
     borderRadius: 99,
+    marginBottom: 15,
   },
   refreshText: {
     color: Colors.white,

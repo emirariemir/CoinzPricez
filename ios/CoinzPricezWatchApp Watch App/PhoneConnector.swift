@@ -10,7 +10,7 @@ import WatchConnectivity
 
 final class PhoneConnector: NSObject, WCSessionDelegate, ObservableObject {
   
-  @Published var receivedMessage = "Waiting..."
+  @Published var receivedMessage = "Waiting for response from app."
   
   func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
     // Something here, lmao

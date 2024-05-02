@@ -19,15 +19,18 @@ struct ContentView: View {
   }
   
     var body: some View {
-      VStack (spacing: 10) {
-          Image(systemName: "heart.fill")
-                .imageScale(.large)
-                .foregroundStyle(.yellow)
+      VStack (spacing: 25) {
+          Image("Logo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 100)
         Text(self.phoneConnector.receivedMessage)
+          .font(.system(size: 12))
           Button {
             sendHearts()
           } label: {
-            Text("Send to app!")
+            Text("Request Refresh")
+              .font(.system(size: 16))
           }
         }
         .padding()
